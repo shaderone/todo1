@@ -1,8 +1,12 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   runApp(MyApp());
 }
+
+var uuid = Uuid();
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -13,8 +17,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   TextEditingController inputController = TextEditingController();
-  bool isCompleted = false;
-  List<String> tasks = [];
+  //to store new tasks
+  List<Todo> tasks = [];
+  //to track whether the text is in create or edit mode
+  bool isEditing = false;
+  // to store the index of the task currently in edit mode
+  int editingIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,7 +55,18 @@ class _MyAppState extends State<MyApp> {
                     FilledButton.icon(
                       onPressed: () {
                         setState(() {
-                          tasks.add(inputController.text);
+                          isEditing
+                              ? tasks[editingIndex].text =
+                                  inputController.text
+                              : tasks.add(
+                                Todo(
+                                  id: uuid.v4(),
+                                  text: inputController.text,
+                                  isCompleted: false,
+                                ),
+                              );
+
+                          isEditing = false;
                         });
                       },
                       label: Icon(Icons.check),
@@ -64,8 +84,7 @@ class _MyAppState extends State<MyApp> {
                         itemCount: tasks.length,
                         physics: BouncingScrollPhysics(),
                         itemBuilder: (context, index) {
-                          //print("index = $index");
-                          String task = tasks[index];
+                          Todo task = tasks[index];
                           return ListTile(
                             leading: Container(
                               constraints: BoxConstraints.tightFor(
@@ -75,40 +94,47 @@ class _MyAppState extends State<MyApp> {
                               child: Checkbox(
                                 materialTapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
-                                value: isCompleted,
+                                value: false, //make it dynamic
                                 onChanged: (value) {
-                                  setState(() {
-                                    isCompleted = !isCompleted;
-                                  });
+                                  //mark as complete
                                 },
                               ),
                             ),
                             title: Text(
-                              //"Buy milk from the whatshop",
-                              task,
+                              task.text,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style:
-                                  isCompleted
-                                      ? TextStyle(
-                                        decoration:
-                                            TextDecoration
-                                                .lineThrough,
-                                        color: Colors.grey,
-                                      )
-                                      : null,
+                              //style:
+                              //    task.isCompleted
+                              //        ? TextStyle(
+                              //          decoration:
+                              //              TextDecoration
+                              //                  .lineThrough,
+                              //          color: Colors.grey,
+                              //        )
+                              //        : null,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton.outlined(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    setState(() {
+                                      isEditing = true;
+                                      editingIndex = index;
+                                      inputController.text =
+                                          task.text;
+                                    });
+                                  },
                                   icon: Icon(Icons.edit),
                                 ),
                                 IconButton.outlined(
                                   onPressed: () {
                                     setState(() {
-                                      tasks.remove(task);
+                                      tasks.removeWhere(
+                                        (Todo todo) =>
+                                            todo.id == task.id,
+                                      );
                                     });
                                   },
                                   icon: Icon(Icons.delete),
@@ -117,8 +143,6 @@ class _MyAppState extends State<MyApp> {
                             ),
                             contentPadding: EdgeInsets.zero,
                             minLeadingWidth: 0,
-
-                            //visualDensity: VisualDensity.compact,
                           );
                         },
                       ),
@@ -130,4 +154,16 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+}
+
+class Todo {
+  String id;
+  bool isCompleted;
+  String text;
+
+  Todo({
+    required this.id,
+    required this.isCompleted,
+    required this.text,
+  });
 }
