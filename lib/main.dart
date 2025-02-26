@@ -13,7 +13,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   TextEditingController inputController = TextEditingController();
-  String task = '';
   List<String> tasks = [];
   @override
   Widget build(BuildContext context) {
@@ -46,7 +45,7 @@ class _MyAppState extends State<MyApp> {
                     FilledButton.icon(
                       onPressed: () {
                         setState(() {
-                          task = inputController.text;
+                          tasks.add(inputController.text);
                         });
                       },
                       label: Icon(Icons.check),
@@ -57,7 +56,49 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
                 SizedBox(height: 20),
-                Text("You have no Todos!"),
+                tasks.isEmpty
+                    ? Text("You have no Todos!")
+                    : Expanded(
+                      child: ListView.builder(
+                        itemCount: tasks.length,
+                        physics: BouncingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          //print("index = $index");
+                          String task = tasks[index];
+                          return ListTile(
+                            leading: Container(
+                              constraints: BoxConstraints.tightFor(
+                                width: 20,
+                                height: 24,
+                              ),
+                              child: Checkbox(
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                value: true,
+                                onChanged: (value) {},
+                              ),
+                            ),
+                            title: Text(
+                              //"Buy milk from the whatshop",
+                              task,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.edit),
+                                Icon(Icons.delete),
+                              ],
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            minLeadingWidth: 0,
+
+                            //visualDensity: VisualDensity.compact,
+                          );
+                        },
+                      ),
+                    ),
               ],
             ),
           ),

@@ -1,12 +1,12 @@
-input
-submit button - create 
-list task - read
-delete task - delete
+input  -- done 
+submit button - create  -- done
+list task - read -- done
+delete task - delete --
 edit task - update 
 mark as completed - update 
 
 
 -----------
-create a list for storing tasks
-then use setstate to append each task to the list 
-use the listview to dynamically generate the listtile
+create a list for storing tasks  -- done
+then use setstate to append each task to the list - done 
+use the listview to dynamically generate the listtile - done
