@@ -94,9 +94,12 @@ class _MyAppState extends State<MyApp> {
                               child: Checkbox(
                                 materialTapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
-                                value: false, //make it dynamic
+                                value:
+                                    task.isCompleted, //make it dynamic
                                 onChanged: (value) {
-                                  //mark as complete
+                                  setState(() {
+                                    task.isCompleted = value!;
+                                  });
                                 },
                               ),
                             ),
@@ -104,15 +107,15 @@ class _MyAppState extends State<MyApp> {
                               task.text,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              //style:
-                              //    task.isCompleted
-                              //        ? TextStyle(
-                              //          decoration:
-                              //              TextDecoration
-                              //                  .lineThrough,
-                              //          color: Colors.grey,
-                              //        )
-                              //        : null,
+                              style:
+                                  task.isCompleted
+                                      ? TextStyle(
+                                        decoration:
+                                            TextDecoration
+                                                .lineThrough,
+                                        color: Colors.grey,
+                                      )
+                                      : null,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
