@@ -1,8 +1,8 @@
 input  -- done 
 submit button - create  -- done
 list task - read -- done
-delete task - delete --
-edit task - update 
+delete task - delete -- done
+edit task - update --- get the old value, put it in input, on click check if the value is in update mode and replace it in the list
 mark as completed - update 
 
 

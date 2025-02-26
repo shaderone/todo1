@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   TextEditingController inputController = TextEditingController();
+  bool isCompleted = false;
   List<String> tasks = [];
   @override
   Widget build(BuildContext context) {
@@ -74,8 +75,12 @@ class _MyAppState extends State<MyApp> {
                               child: Checkbox(
                                 materialTapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
-                                value: true,
-                                onChanged: (value) {},
+                                value: isCompleted,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isCompleted = !isCompleted;
+                                  });
+                                },
                               ),
                             ),
                             title: Text(
@@ -83,12 +88,31 @@ class _MyAppState extends State<MyApp> {
                               task,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style:
+                                  isCompleted
+                                      ? TextStyle(
+                                        decoration:
+                                            TextDecoration
+                                                .lineThrough,
+                                        color: Colors.grey,
+                                      )
+                                      : null,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.edit),
-                                Icon(Icons.delete),
+                                IconButton.outlined(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.edit),
+                                ),
+                                IconButton.outlined(
+                                  onPressed: () {
+                                    setState(() {
+                                      tasks.remove(task);
+                                    });
+                                  },
+                                  icon: Icon(Icons.delete),
+                                ),
                               ],
                             ),
                             contentPadding: EdgeInsets.zero,
