@@ -14,12 +14,12 @@ use the listview to dynamically generate the listtile - done
 1. **Input Validation**  - done 
 2. **Clearing Input Field After Submission**   - done
 3. **Empty Task Submission Prevention**  - done
-4. **Keyboard Dismissal After Submission**  
-5. **Trim Input Whitespace Before Submission**  
+4. **Keyboard Dismissal After Submission**   - done 
+5. **Trim Input Whitespace Before Submission**  - done 
 6. **Custom Styling for Completed Tasks**  
-7. **No Empty Space After Task Deletion**  
-8. **Text Capitalization for Inputs**  
-9. **Confirmation Dialog Before Task Deletion**  
+7. **No Empty Space After Task Deletion**  - done 
+8. **Text Capitalization for Inputs**  - done 
+9. **Confirmation Dialog Before Task Deletion**  - done
 10. **Edit Cancel Functionality**  
 11. **Editing Indicator UI (eg: different button or icon)**  
 12. **Disable Submit Button for Empty Input**  

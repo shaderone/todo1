@@ -56,7 +56,15 @@ class _MyAppState extends State<MyApp> {
                       builder: (context) {
                         return FilledButton.icon(
                           onPressed: () {
-                            if (inputController.text.isEmpty) {
+                            //capitalize the first letter
+                            String taskValue =
+                                inputController.text
+                                    .trim()[0]
+                                    .toUpperCase() +
+                                inputController.text.trim().substring(
+                                  1,
+                                );
+                            if (taskValue.isEmpty) {
                               ScaffoldMessenger.of(
                                 context,
                               ).showSnackBar(
@@ -71,11 +79,11 @@ class _MyAppState extends State<MyApp> {
                               setState(() {
                                 isEditing
                                     ? tasks[editingIndex].text =
-                                        inputController.text.trim()
+                                        taskValue
                                     : tasks.add(
                                       Todo(
                                         id: uuid.v4(),
-                                        text: inputController.text,
+                                        text: taskValue,
                                         isCompleted: false,
                                       ),
                                     );
@@ -153,12 +161,41 @@ class _MyAppState extends State<MyApp> {
                                 ),
                                 IconButton.outlined(
                                   onPressed: () {
-                                    setState(() {
-                                      tasks.removeWhere(
-                                        (Todo todo) =>
-                                            todo.id == task.id,
-                                      );
-                                    });
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                            "Delete ${task.text}?",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(
+                                                  context,
+                                                ).pop();
+                                              },
+                                              child: Text("No"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  tasks.removeWhere(
+                                                    (Todo todo) =>
+                                                        todo.id ==
+                                                        task.id,
+                                                  );
+                                                });
+                                                Navigator.of(
+                                                  context,
+                                                ).pop();
+                                              },
+                                              child: Text("Yes"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
                                   icon: Icon(Icons.delete),
                                 ),
