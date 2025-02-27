@@ -3,10 +3,28 @@ submit button - create  -- done
 list task - read -- done
 delete task - delete -- done
 edit task - update --- get the old value, put it in input, on click check if the value is in update mode and replace it in the list
-mark as completed - update 
-
+mark as completed - update -- done (by using the checkbox and data model)
 
 -----------
 create a list for storing tasks  -- done
 then use setstate to append each task to the list - done 
 use the listview to dynamically generate the listtile - done
+
+-------------
+1. **Input Validation**  - done 
+2. **Clearing Input Field After Submission**   - done
+3. **Empty Task Submission Prevention**  - done
+4. **Keyboard Dismissal After Submission**  
+5. **Trim Input Whitespace Before Submission**  
+6. **Custom Styling for Completed Tasks**  
+7. **No Empty Space After Task Deletion**  
+8. **Text Capitalization for Inputs**  
+9. **Confirmation Dialog Before Task Deletion**  
+10. **Edit Cancel Functionality**  
+11. **Editing Indicator UI (eg: different button or icon)**  
+12. **Disable Submit Button for Empty Input**  
+13. **Allow Multi-line Text Input**  
+14. **Scroll to Newly Added Task Automatically**  
+
+✅ Local storage is on hold.
+

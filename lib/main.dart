@@ -52,27 +52,47 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                     ),
-                    FilledButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          isEditing
-                              ? tasks[editingIndex].text =
-                                  inputController.text
-                              : tasks.add(
-                                Todo(
-                                  id: uuid.v4(),
-                                  text: inputController.text,
-                                  isCompleted: false,
+                    Builder(
+                      builder: (context) {
+                        return FilledButton.icon(
+                          onPressed: () {
+                            if (inputController.text.isEmpty) {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Task cannot be empty!",
+                                  ),
                                 ),
                               );
+                              return;
+                            } else {
+                              setState(() {
+                                isEditing
+                                    ? tasks[editingIndex].text =
+                                        inputController.text.trim()
+                                    : tasks.add(
+                                      Todo(
+                                        id: uuid.v4(),
+                                        text: inputController.text,
+                                        isCompleted: false,
+                                      ),
+                                    );
 
-                          isEditing = false;
-                        });
+                                isEditing = false;
+                              });
+                            }
+                            FocusManager.instance.primaryFocus
+                                ?.unfocus();
+                            inputController.clear();
+                          },
+                          label: Icon(Icons.check),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
                       },
-                      label: Icon(Icons.check),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                      ),
                     ),
                   ],
                 ),
