@@ -20,10 +20,10 @@ use the listview to dynamically generate the listtile - done
 7. **No Empty Space After Task Deletion**  - done 
 8. **Text Capitalization for Inputs**  - done 
 9. **Confirmation Dialog Before Task Deletion**  - done
-10. **Edit Cancel Functionality**  
-11. **Editing Indicator UI (eg: different button or icon)**  
-12. **Disable Submit Button for Empty Input**  
-13. **Allow Multi-line Text Input**  
+10. **Edit Cancel Functionality**  - done 
+11. **Editing Indicator UI (eg: different button or icon)**  - done
+12. **Disable Submit Button for Empty Input**  - done
+13. **Allow Multi-line Text Input**  -- done
 14. **Scroll to Newly Added Task Automatically**  
 
 ✅ Local storage is on hold.

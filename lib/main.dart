@@ -30,8 +30,16 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Todo App"),
-          backgroundColor: Colors.blueAccent,
+          title: Text(
+            "TODOBAR.",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          toolbarHeight: 75,
+          backgroundColor: Colors.black,
         ),
         body: SafeArea(
           child: Padding(
@@ -47,24 +55,33 @@ class _MyAppState extends State<MyApp> {
                       child: TextField(
                         controller: inputController,
                         decoration: InputDecoration(
-                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 2,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 3,
+                            ),
+                          ),
                           hintText: "Enter a task",
                         ),
+                        keyboardType: TextInputType.multiline,
+                        //maxLines: 3,
                       ),
                     ),
+                    SizedBox(width: 10),
                     Builder(
                       builder: (context) {
                         return FilledButton.icon(
                           onPressed: () {
                             //capitalize the first letter
-                            String taskValue =
-                                inputController.text
-                                    .trim()[0]
-                                    .toUpperCase() +
-                                inputController.text.trim().substring(
-                                  1,
-                                );
-                            if (taskValue.isEmpty) {
+
+                            if (inputController.text.isEmpty) {
+                              print("hey");
                               ScaffoldMessenger.of(
                                 context,
                               ).showSnackBar(
@@ -76,6 +93,13 @@ class _MyAppState extends State<MyApp> {
                               );
                               return;
                             } else {
+                              String taskValue =
+                                  inputController.text
+                                      .trim()[0]
+                                      .toUpperCase() +
+                                  inputController.text
+                                      .trim()
+                                      .substring(1);
                               setState(() {
                                 isEditing
                                     ? tasks[editingIndex].text =
@@ -95,9 +119,12 @@ class _MyAppState extends State<MyApp> {
                                 ?.unfocus();
                             inputController.clear();
                           },
-                          label: Icon(Icons.check),
+                          label:
+                              isEditing
+                                  ? Text("Update")
+                                  : Text("add"),
                           style: FilledButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.black,
                           ),
                         );
                       },
@@ -150,14 +177,24 @@ class _MyAppState extends State<MyApp> {
                               children: [
                                 IconButton.outlined(
                                   onPressed: () {
+                                    print(isEditing);
                                     setState(() {
-                                      isEditing = true;
+                                      isEditing = !isEditing;
                                       editingIndex = index;
                                       inputController.text =
                                           task.text;
                                     });
+                                    if (!isEditing) {
+                                      inputController.clear();
+                                    }
                                   },
-                                  icon: Icon(Icons.edit),
+                                  icon:
+                                      isEditing
+                                          ? Icon(
+                                            Icons.close,
+                                            color: Colors.red,
+                                          )
+                                          : Icon(Icons.edit),
                                 ),
                                 IconButton.outlined(
                                   onPressed: () {
