@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   //to store new tasks
   List<Todo> tasks = [];
   //to track whether the text is in create or edit mode
-  bool isEditing = false;
+  bool isEditing = false; // * change it to enum
   // to store the index of the task currently in edit mode
   int editingIndex = -1;
   bool canPop = false;
@@ -118,7 +118,8 @@ class _MyAppState extends State<MyApp> {
                                           isCompleted: false,
                                         ),
                                       );
-
+                                  tasks[editingIndex].isCompleted =
+                                      false;
                                   isEditing = false;
                                 });
                               }
@@ -197,7 +198,10 @@ class _MyAppState extends State<MyApp> {
                                       }
                                     },
                                     icon:
-                                        isEditing
+                                        isEditing &&
+                                                task.id ==
+                                                    tasks[editingIndex]
+                                                        .id
                                             ? Icon(
                                               Icons.close,
                                               color: Colors.red,
