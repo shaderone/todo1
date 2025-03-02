@@ -8,6 +8,8 @@ void main() {
 
 var uuid = Uuid();
 
+enum TaskMode { create, edit }
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -20,7 +22,8 @@ class _MyAppState extends State<MyApp> {
   //to store new tasks
   List<Todo> tasks = [];
   //to track whether the text is in create or edit mode
-  bool isEditing = false; // * change it to enum
+  //bool isEditing = false; // * change it to enum
+  TaskMode taskMode = TaskMode.create;
   // to store the index of the task currently in edit mode
   int editingIndex = -1;
   bool canPop = false;
@@ -108,7 +111,7 @@ class _MyAppState extends State<MyApp> {
                                         .trim()
                                         .substring(1);
                                 setState(() {
-                                  isEditing
+                                  taskMode == TaskMode.edit
                                       ? tasks[editingIndex].text =
                                           taskValue
                                       : tasks.add(
@@ -118,9 +121,11 @@ class _MyAppState extends State<MyApp> {
                                           isCompleted: false,
                                         ),
                                       );
-                                  tasks[editingIndex].isCompleted =
-                                      false;
-                                  isEditing = false;
+                                  if (taskMode == TaskMode.edit) {
+                                    tasks[editingIndex].isCompleted =
+                                        false;
+                                  }
+                                  taskMode = TaskMode.create;
                                 });
                               }
                               FocusManager.instance.primaryFocus
@@ -128,7 +133,7 @@ class _MyAppState extends State<MyApp> {
                               inputController.clear();
                             },
                             label:
-                                isEditing
+                                taskMode == TaskMode.edit
                                     ? Text("Update")
                                     : Text("add"),
                             style: FilledButton.styleFrom(
@@ -186,19 +191,24 @@ class _MyAppState extends State<MyApp> {
                                 children: [
                                   IconButton.outlined(
                                     onPressed: () {
-                                      print(isEditing);
                                       setState(() {
-                                        isEditing = !isEditing;
+                                        taskMode =
+                                            taskMode ==
+                                                    TaskMode.create
+                                                ? TaskMode.edit
+                                                : TaskMode.create;
+
                                         editingIndex = index;
                                         inputController.text =
                                             task.text;
                                       });
-                                      if (!isEditing) {
+                                      if (taskMode ==
+                                          TaskMode.create) {
                                         inputController.clear();
                                       }
                                     },
                                     icon:
-                                        isEditing &&
+                                        taskMode == TaskMode.edit &&
                                                 task.id ==
                                                     tasks[editingIndex]
                                                         .id
