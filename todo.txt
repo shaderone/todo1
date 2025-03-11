@@ -1,5 +1,23 @@
-write functions sperately - 
-allow task reordering
+write functions sperately - done
+allow task reordering - later
 enum for mode switching - done
-seperate code structure.
+seperate code structure. - done
+
+--------------
+data to be stored:
+task name
+is done 
+id
+
+-------------
+
+read saving and storing in sharedpreference
+
+-----------
+tasks :
+save - done 
+retrieve and display - 
+delete - 
+edit - 
+mark as complete -
 
