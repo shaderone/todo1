@@ -4,20 +4,12 @@ enum for mode switching - done
 seperate code structure. - done
 
 --------------
-data to be stored:
-task name
-is done 
-id
-
--------------
-
-read saving and storing in sharedpreference
 
 -----------
 tasks :
 save - done 
-retrieve and display - 
-delete - 
-edit - 
-mark as complete -
+retrieve and display - done
+delete - done
+edit - done
+mark as complete - done
 
