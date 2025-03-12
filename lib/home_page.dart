@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
     //prefs.clear();
     List<String>? todos = prefs.getStringList(HomePage.TODOLIST);
     if (todos == null) {
-      print("nothing");
       tasks = [];
       return;
     } else {
@@ -142,10 +141,12 @@ class _HomePageState extends State<HomePage> {
                                 //materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 visualDensity: VisualDensity.compact,
                                 value: todoItem.isDone, //make it dynamic
-                                onChanged:
-                                    (value) => setState(() {
-                                      todoItem.isDone = value!;
-                                    }),
+                                onChanged: (value) {
+                                  setState(() {
+                                    todoItem.isDone = value!;
+                                  });
+                                  saveData();
+                                },
                               ),
                             ),
                             title: Text(
@@ -186,6 +187,7 @@ class _HomePageState extends State<HomePage> {
                                                 setState(() {
                                                   tasks.removeWhere((Todo todo) => todo.id == todoItem.id);
                                                 });
+                                                saveData();
                                                 Navigator.of(context).pop();
                                               },
                                               child: Text("Yes"),
@@ -236,8 +238,8 @@ class _HomePageState extends State<HomePage> {
           // ? first add the todo to a local List
           tasks.add(Todo(id: uuid.v4(), task: taskValue, isDone: false));
           // ? also save the data to localstorage : sharedpreference
-          saveData();
         }
+        saveData();
         // reset mode back to default
         taskMode = TaskMode.create;
       });
@@ -266,5 +268,11 @@ class _HomePageState extends State<HomePage> {
     List<String> todoList = tasks.map((todoItem) => jsonEncode(todoItem.convertModeltoMap())).toList();
     // ? Then store it in the localstorage
     await prefs.setStringList(HomePage.TODOLIST, todoList);
+  }
+
+  @override
+  void dispose() {
+    inputController.dispose();
+    super.dispose();
   }
 } // end of Myapp
