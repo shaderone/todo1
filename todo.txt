@@ -1,15 +1,13 @@
-write functions sperately - done
-allow task reordering - later
-enum for mode switching - done
-seperate code structure. - done
 
---------------
 
 -----------
-tasks :
+isar tasks :
 save - done 
-retrieve and display - done
 delete - done
+retrieve and display - done 
 edit - done
 mark as complete - done
 
+
+
+allow task reordering - later

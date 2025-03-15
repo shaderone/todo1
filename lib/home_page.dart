@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 
 import 'models/todo_model.dart';
@@ -13,36 +11,14 @@ enum TaskMode { create, edit }
 class HomePage extends StatefulWidget {
   // ignore: constant_identifier_names
   static const TODOLIST = 'todos';
-  const HomePage({super.key});
+  final Isar isar;
+  const HomePage(this.isar, {super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    super.initState();
-    readTodos();
-  }
-
-  Future<void> readTodos() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    //prefs.clear();
-    List<String>? todos = prefs.getStringList(HomePage.TODOLIST);
-    if (todos == null) {
-      tasks = [];
-      return;
-    } else {
-      // ? traverse through the map of strings
-      // ? take each map/json and convert it to dart object then store it in a list
-      //List<Map<String, dynamic>> todoMap = todos.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
-      setState(() {
-        tasks = todos.map((todoItem) => Todo.fromMapToModel(jsonDecode(todoItem))).toList();
-      });
-    }
-  }
-
   TextEditingController inputController = TextEditingController();
   //to store new tasks
   List<Todo> tasks = []; //? list for the ui
@@ -53,7 +29,30 @@ class _HomePageState extends State<HomePage> {
   bool canPop = false;
 
   @override
+  void initState() {
+    super.initState();
+    readTodos();
+  }
+
+  Future<void> readTodos() async {
+    // * the isar.todos is the name given by the isar_generator
+    final todos = await widget.isar.todos.where().findAll();
+
+    if (todos.isEmpty) {
+      setState(() {
+        tasks = [];
+      });
+      return;
+    } else {
+      setState(() {
+        tasks = todos;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    readTodos();
     return PopScope(
       // * canPop decides whether the back button should work as it is expected.
       canPop: canPop,
@@ -73,17 +72,13 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("TODOBAR.", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          //centerTitle: true,
           toolbarHeight: 75,
           backgroundColor: Colors.black,
           actions: [
             IconButton(
               onPressed: () async {
-                final SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.clear();
-                setState(() {
-                  tasks.clear();
-                });
+                await widget.isar.writeTxn(() async => await widget.isar.clear());
+                setState(() {});
               },
               icon: Icon(Icons.clean_hands_rounded),
             ),
@@ -132,20 +127,18 @@ class _HomePageState extends State<HomePage> {
                         itemCount: tasks.length,
                         physics: BouncingScrollPhysics(),
                         itemBuilder: (context, index) {
-                          //Todo task = tasks[index];
                           Todo todoItem = tasks[index];
                           return ListTile(
                             leading: Container(
                               constraints: BoxConstraints.tightFor(width: 20, height: 24),
                               child: Checkbox(
-                                //materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 visualDensity: VisualDensity.compact,
-                                value: todoItem.isDone, //make it dynamic
+                                value: todoItem.isDone,
                                 onChanged: (value) {
                                   setState(() {
                                     todoItem.isDone = value!;
                                   });
-                                  saveData();
+                                  saveData(todoItem);
                                 },
                               ),
                             ),
@@ -183,12 +176,15 @@ class _HomePageState extends State<HomePage> {
                                               child: Text("No"),
                                             ),
                                             TextButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  tasks.removeWhere((Todo todo) => todo.id == todoItem.id);
+                                              onPressed: () async {
+                                                final navigator = Navigator.of(context);
+                                                await widget.isar.writeTxn(() async {
+                                                  await widget.isar.todos.delete(todoItem.isarId); // delete
                                                 });
-                                                saveData();
-                                                Navigator.of(context).pop();
+                                                setState(() {});
+                                                if (mounted) {
+                                                  navigator.pop();
+                                                }
                                               },
                                               child: Text("Yes"),
                                             ),
@@ -232,14 +228,11 @@ class _HomePageState extends State<HomePage> {
         if (taskMode == TaskMode.edit) {
           tasks[editingIndex].task = taskValue;
           tasks[editingIndex].isDone = false; // reset the completion status
+          saveData(tasks[editingIndex]);
+        } else {
+          saveData(Todo(id: uuid.v4(), task: taskValue, isDone: false));
         }
-        //if its create mode, add the value in the list to the as new todo
-        else {
-          // ? first add the todo to a local List
-          tasks.add(Todo(id: uuid.v4(), task: taskValue, isDone: false));
-          // ? also save the data to localstorage : sharedpreference
-        }
-        saveData();
+
         // reset mode back to default
         taskMode = TaskMode.create;
       });
@@ -247,6 +240,12 @@ class _HomePageState extends State<HomePage> {
     // ? To hide keyboard after create/edit
     //FocusManager.instance.primaryFocus?.unfocus();
     inputController.clear();
+  }
+
+  Future<void> saveData(Todo todo) async {
+    await widget.isar.writeTxn(() async {
+      await widget.isar.todos.put(todo);
+    });
   }
 
   void onEdit({required int index, required Todo todo}) {
@@ -258,16 +257,6 @@ class _HomePageState extends State<HomePage> {
     if (taskMode == TaskMode.create) {
       inputController.clear();
     }
-  }
-
-  Future<void> saveData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // ? convert the Todo objects in the tasks[] to a list of json-encoded maps.
-    // because in sharedpreference we store multiple data in the form of a stringified-field-list. (or simply json like format)
-    //first we need to convert all the todoItems to a map type because that the most similar dataype to json syntax (key-value). it is also a natively supported datatype by json
-    List<String> todoList = tasks.map((todoItem) => jsonEncode(todoItem.convertModeltoMap())).toList();
-    // ? Then store it in the localstorage
-    await prefs.setStringList(HomePage.TODOLIST, todoList);
   }
 
   @override
