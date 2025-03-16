@@ -7,13 +7,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:todo_app/main.dart';
+import 'package:todo_app/models/todo_model.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    final dir = await getApplicationDocumentsDirectory();
+
+    final isar = await Isar.open([TodoSchema], directory: dir.path);
+    await tester.pumpWidget(MyApp(isar: isar));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

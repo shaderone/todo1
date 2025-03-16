@@ -32,13 +32,19 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.5
   shared_preferences: ^2.5.2
   uuid: ^4.5.1
 
 dev_dependencies:
+  analyzer: ^5.13.0
+  build_runner: 2.4.13 # downgraded for isar_generator conflict
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  isar_generator: ^3.1.0+1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
