@@ -31,7 +31,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    readTodos();
+
+    Future.microtask(() => readTodos()); // to prevent setState() from interfering with initState()
+
+    widget.isar.todos.watchLazy().listen(
+      (_) async => readTodos(), // read todos when any change occours
+    );
   }
 
   Future<void> readTodos() async {
@@ -42,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("build called");
+    //print("build called");
     return PopScope(
       // * canPop decides whether the back button should work as it is expected.
       canPop: canPop,
@@ -50,10 +55,10 @@ class _HomePageState extends State<HomePage> {
       onPopInvokedWithResult: (didPop, result) {
         // * if didPop = true, the app already exited — no need to do anything.
         // * if didPop = false, app did not exit (most likely because keyboard was open).
-        // * In that case, first remove focus (hide keyboard).
-        FocusScope.of(context).unfocus();
-        // * After hiding keyboard, set canPop = true to allow the app to exit on the next back press.
         if (!didPop) {
+          // * In that case, first remove focus (hide keyboard).
+          FocusScope.of(context).unfocus();
+          // * After hiding keyboard, set canPop = true to allow the app to exit on the next back press.
           setState(() {
             canPop = true;
           });
@@ -66,10 +71,7 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.black,
           actions: [
             IconButton(
-              onPressed: () async {
-                await widget.isar.writeTxn(() async => await widget.isar.clear());
-                setState(() {});
-              },
+              onPressed: () async => await widget.isar.writeTxn(() async => await widget.isar.clear()),
               icon: Icon(Icons.clean_hands_rounded),
             ),
           ],
@@ -125,10 +127,8 @@ class _HomePageState extends State<HomePage> {
                                 visualDensity: VisualDensity.compact,
                                 value: todoItem.isDone,
                                 onChanged: (value) {
-                                  setState(() {
-                                    todoItem.isDone = value!;
-                                  });
-                                  saveData(todoItem);
+                                  todoItem.isDone = value!;
+                                  saveData(todoItem).then((_) => setState(() {}));
                                 },
                               ),
                             ),
@@ -171,10 +171,7 @@ class _HomePageState extends State<HomePage> {
                                                 await widget.isar.writeTxn(() async {
                                                   await widget.isar.todos.delete(todoItem.isarId); // delete
                                                 });
-                                                setState(() {});
-                                                if (mounted) {
-                                                  navigator.pop();
-                                                }
+                                                navigator.pop();
                                               },
                                               child: Text("Yes"),
                                             ),
@@ -213,16 +210,16 @@ class _HomePageState extends State<HomePage> {
         taskValue = taskValue[0].toUpperCase() + taskValue.substring(1);
       }
 
-      setState(() {
-        //if its editing mode, update the value in the list to the new value
-        if (taskMode == TaskMode.edit) {
-          tasks[editingIndex].task = taskValue;
-          tasks[editingIndex].isDone = false; // reset the completion status
-          saveData(tasks[editingIndex]);
-        } else {
-          saveData(Todo(id: uuid.v4(), task: taskValue, isDone: false));
-        }
+      //if its editing mode, update the value in the list to the new value
+      if (taskMode == TaskMode.edit) {
+        tasks[editingIndex].task = taskValue;
+        tasks[editingIndex].isDone = false; // reset the completion status
+        saveData(tasks[editingIndex]);
+      } else {
+        saveData(Todo(id: uuid.v4(), task: taskValue, isDone: false));
+      }
 
+      setState(() {
         // reset mode back to default
         taskMode = TaskMode.create;
       });
@@ -230,7 +227,6 @@ class _HomePageState extends State<HomePage> {
     // ? To hide keyboard after create/edit
     //FocusManager.instance.primaryFocus?.unfocus();
     inputController.clear();
-    readTodos();
   }
 
   Future<void> saveData(Todo todo) async {
@@ -241,13 +237,10 @@ class _HomePageState extends State<HomePage> {
 
   void onEdit({required int index, required Todo todo}) {
     setState(() {
-      taskMode = taskMode == TaskMode.create ? TaskMode.edit : TaskMode.create;
+      taskMode = TaskMode.edit;
       editingIndex = index;
       inputController.text = todo.task;
     });
-    if (taskMode == TaskMode.create) {
-      inputController.clear();
-    }
   }
 
   @override
