@@ -33,16 +33,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     Future.microtask(() => readTodos()); // to prevent setState() from interfering with initState()
-
-    widget.isar.todos.watchLazy().listen(
-      (_) async => readTodos(), // read todos when any change occours
-    );
   }
 
   Future<void> readTodos() async {
     // * the isar.todos is the name given by the isar_generator
     tasks = await widget.isar.todos.where().findAll();
-    setState(() {});
   }
 
   @override
@@ -110,86 +105,97 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 SizedBox(height: 20),
-                tasks.isEmpty
-                    ? Text("You have no Todos!")
-                    // ? todo items
-                    : Expanded(
-                      child: ListView.builder(
-                        //itemCount: tasks.length,
-                        itemCount: tasks.length,
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          Todo todoItem = tasks[index];
-                          return ListTile(
-                            leading: Container(
-                              constraints: BoxConstraints.tightFor(width: 20, height: 24),
-                              child: Checkbox(
-                                visualDensity: VisualDensity.compact,
-                                value: todoItem.isDone,
-                                onChanged: (value) {
-                                  todoItem.isDone = value!;
-                                  saveData(todoItem).then((_) => setState(() {}));
-                                },
-                              ),
-                            ),
-                            title: Text(
-                              todoItem.task,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  todoItem.isDone
-                                      ? TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey)
-                                      : null,
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton.outlined(
-                                  onPressed: () => onEdit(index: index, todo: todoItem),
-                                  icon:
-                                      taskMode == TaskMode.edit && todoItem.id == tasks[editingIndex].id
-                                          ? Icon(Icons.close, color: Colors.red)
-                                          : Icon(Icons.edit),
+                Expanded(
+                  child: StreamBuilder(
+                    stream: widget.isar.todos.watchLazy(fireImmediately: true),
+                    builder: (context, _) {
+                      return FutureBuilder<List<Todo>>(
+                        future: widget.isar.todos.where().findAll(),
+                        builder: (context, futureSnapshot) {
+                          if (futureSnapshot.connectionState == ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (!futureSnapshot.hasData || futureSnapshot.data!.isEmpty) {
+                            return Text("You have no Todos!");
+                          }
+                          return ListView.builder(
+                            itemCount: futureSnapshot.data!.length,
+                            physics: BouncingScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              Todo todoItem = futureSnapshot.data![index];
+                              return ListTile(
+                                leading: Container(
+                                  constraints: BoxConstraints.tightFor(width: 20, height: 24),
+                                  child: Checkbox(
+                                    visualDensity: VisualDensity.compact,
+                                    value: todoItem.isDone,
+                                    onChanged: (value) {
+                                      todoItem.isDone = value!;
+                                      saveData(todoItem);
+                                    },
+                                  ),
                                 ),
-                                IconButton.outlined(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text("Delete ${todoItem.task}?", softWrap: true),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: Text("No"),
-                                            ),
-                                            TextButton(
-                                              onPressed: () async {
-                                                final navigator = Navigator.of(context);
-                                                await widget.isar.writeTxn(() async {
-                                                  await widget.isar.todos.delete(todoItem.isarId); // delete
-                                                });
-                                                navigator.pop();
-                                              },
-                                              child: Text("Yes"),
-                                            ),
-                                          ],
+                                title: Text(
+                                  todoItem.task,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      todoItem.isDone
+                                          ? TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey)
+                                          : null,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton.outlined(
+                                      onPressed: () => onEdit(index: index, todo: todoItem),
+                                      icon:
+                                          taskMode == TaskMode.edit && todoItem.id == tasks[editingIndex].id
+                                              ? Icon(Icons.close, color: Colors.red)
+                                              : Icon(Icons.edit),
+                                    ),
+                                    IconButton.outlined(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text("Delete ${todoItem.task}?", softWrap: true),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text("No"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    final navigator = Navigator.of(context);
+                                                    await widget.isar.writeTxn(() async {
+                                                      await widget.isar.todos.delete(todoItem.isarId); // delete
+                                                    });
+                                                    navigator.pop();
+                                                  },
+                                                  child: Text("Yes"),
+                                                ),
+                                              ],
+                                            );
+                                          },
                                         );
                                       },
-                                    );
-                                  },
-                                  icon: Icon(Icons.delete),
+                                      icon: Icon(Icons.delete),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            contentPadding: EdgeInsets.zero,
-                            minLeadingWidth: 0,
+                                contentPadding: EdgeInsets.zero,
+                                minLeadingWidth: 0,
+                              );
+                            },
                           );
                         },
-                      ),
-                    ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -236,6 +242,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onEdit({required int index, required Todo todo}) {
+    readTodos();
     setState(() {
       taskMode = TaskMode.edit;
       editingIndex = index;
