@@ -36,23 +36,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> readTodos() async {
     // * the isar.todos is the name given by the isar_generator
-    final todos = await widget.isar.todos.where().findAll();
-
-    if (todos.isEmpty) {
-      setState(() {
-        tasks = [];
-      });
-      return;
-    } else {
-      setState(() {
-        tasks = todos;
-      });
-    }
+    tasks = await widget.isar.todos.where().findAll();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    readTodos();
+    print("build called");
     return PopScope(
       // * canPop decides whether the back button should work as it is expected.
       canPop: canPop,
@@ -240,6 +230,7 @@ class _HomePageState extends State<HomePage> {
     // ? To hide keyboard after create/edit
     //FocusManager.instance.primaryFocus?.unfocus();
     inputController.clear();
+    readTodos();
   }
 
   Future<void> saveData(Todo todo) async {

@@ -13,7 +13,16 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
-    project.evaluationDependsOn(":app")
+    afterEvaluate {
+        if (plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")) {
+            extensions.configure<com.android.build.gradle.BaseExtension> {
+                compileSdkVersion(35)
+            }
+        }
+    }
+
+    buildDir = file("${rootProject.buildDir}/${name}")
+    evaluationDependsOn(":app")
 }
 
 tasks.register<Delete>("clean") {
